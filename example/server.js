@@ -1,18 +1,8 @@
-# server-sent-events-ts
-
-Server-Sent Events handler for Node.js written in TypeScript.
-
-## Installation
-
-```bash
-npm install --save server-sent-events-ts
-```
-
-## Example Usage
-
-```typescript
+const fs = require("fs");
+const path = require("path");
 const { Webserver } = require("webserver-ts");
-const { ServerSentEvents, EventBuilder } = require("server-sent-events-ts");
+
+const { ServerSentEvents, EventBuilder } = require("../dist/index.js");
 
 let counter = 0;
 const port = 3000;
@@ -36,5 +26,18 @@ new Webserver()
             }, 5 * 1000);
         },
     })
+    .addResource({
+        match: (data) => data.url === "/",
+        onRequest: (data) => {
+            const content = fs.readFileSync(path.join(".", "index.html"));
+            data.response.end(content);
+        },
+    })
+    .addResource({
+        match: (data) => data.url === "/client.js",
+        onRequest: (data) => {
+            const content = fs.readFileSync(path.join(".", data.url));
+            data.response.end(content);
+        },
+    })
     .run(port);
-```
